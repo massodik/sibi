@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <title>DETEKSI SIBI || Muhammad Aqsal Sirulah Sodik</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-image: url("static/bg/bg-1.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+
+      .header {
+        background-color: #212529;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 30px;
+        margin: 0;
+      }
+
+      .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px;
+      }
+
+      .intro-section {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .intro-section h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .intro-section p {
+        font-size: 16px;
+        margin-bottom: 0;
+      }
+
+      .video-container {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .video-container img {
+        max-width: 100%;
+        border-radius: 35px;
+      }
+
+      .footer {
+        background-color: #212529;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      /* Tambahkan style untuk gambar yang muncul saat huruf A terdeteksi */
+      .image-overlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .image-overlay img {
+        max-width: 100%;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>Pendeteksi Sistem Isyarat Bahasa Indonesia (SIBI)</h1>
+    </div>
+
+    <div class="main-content">
+      <div class="intro-section">
+        <h2>Real Time Gestur Tangan dengan YOLOV5</h2>
+        <p>Mari Belajar Bahasa Isyarat!!.</p>
+      </div>
+
+      <div class="video-container">
+        <img src="{{ url_for('video') }}" />
+      </div>
+
+      <!-- Tambahkan div untuk overlay gambar -->
+      <div class="image-overlay" id="image-overlay">
+        <img id="overlay-image" />
+      </div>
+    </div>
+
+    <div>
+      <h2>Huruf yang Terdeteksi</h2>
+      <ul id="detected-letters"></ul>
+      <button onclick="resetDetectedLetters()">Reset Huruf</button>
+    </div>
+
+    <div class="footer">
+      &copy; 2024 TA Muhammad Aqsal Sirulah Sodik. All rights reserved.
+    </div>
+
+    <script>
+      function updateDetectedLetters() {
+        $.ajax({
+          url: "/letters",
+          type: "GET",
+          success: function(response) {
+            $('#detected-letters').empty();
+            $.each(response.letters, function(index, letter) {
+              $('#detected-letters').append('<li>' + letter + '</li>');
+            });
+          },
+          error: function(xhr, status, error) {
+            console.error("Error:", error);
+          }
+        });
+      }
+
+      function resetDetectedLetters() {
+        fetch('/reset')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Reset failed');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              $('#detected-letters').empty();
+            } else {
+              console.error('Reset failed');
+            }
+          })
+          .catch(error => {
+            console.error('Error resetting detected letters:', error);
+          });
+      }
+
+      function getDetectedLetters() {
+        fetch('/letters')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch detected letters');
+            }
+            return response.json();
+          })
+          .then(data => {
+            $('#detected-letters').empty();
+            data.letters.forEach(letter => {
+              $('#detected-letters').append('<li>' + letter + '</li>');
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching detected letters:', error);
+          });
+      }
+
+      setInterval(getDetectedLetters, 1000);
+    </script>
+  </body>
+</html>
